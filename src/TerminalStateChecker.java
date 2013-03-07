@@ -1,10 +1,7 @@
 public class TerminalStateChecker {
-	private static int[][] Directions = new int[][] {{0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}};
-	
-	private State _currentState;
+	private static int[][] vectors = new int[][] {{1, 1}, {1, -1}, {1, 0}, {0, 1}};
 	
 	public IGameLogic.Winner check(State s) {
-		_currentState = s;
 		//get index of last move
 		Move lastMove = s.PeekLatestMove();
 		if(lastMove == null) {
@@ -13,33 +10,38 @@ public class TerminalStateChecker {
 		
 		int p = lastMove.player;
 		int col = lastMove.column;
-		int row = _currentState.columnHeight(col) - 1;
+		int row = s.columnHeight(col) - 1;
 		
-		for (int[] d : Directions) {
-			if(foundConnected(4, col, row, p, d)) {
+		for (int[] v : vectors) {
+			int found = 1;
+			int x = col + v[0];
+			int y = row + v[1];
+			
+			while(found < 4 && s.Peek(x, y) == p) { //look ahead 
+				found++;
+				x += v[0];
+				y += v[1];
+			}
+			
+			x = col - v[0];
+			y = row - v[1];
+			
+			while(found < 4 && s.Peek(x, y) == p) { //look behind
+				found++;
+				x -= v[0];
+				y -= v[1];
+			}
+			
+			if (found >= 4) {
 				return p == 1 ? IGameLogic.Winner.PLAYER1 : IGameLogic.Winner.PLAYER2;
 			}
 		}
-		//for each possible neighbor (8), look for 4 in a row
 		
-		return IGameLogic.Winner.NOT_FINISHED;
-	}
-	
-	private boolean foundConnected(int n, int col, int row, int player, int[] direction) {
-		if(n == 0) {
-			return true;
+		if(s.isBoardFull()) {
+			return IGameLogic.Winner.TIE;
 		}
 		
-		if(col < 0) // || col >= width
-			return false;
-		
-		if(row < 0) // || row >= height
-			return false;
-		
-		if(_currentState.Peek(col, row) != player) //current is right
-			return false;
-		
-		return foundConnected(n-1, col + direction[0], row + direction[1], player, direction);
+		return IGameLogic.Winner.NOT_FINISHED;
 	}
 }
 

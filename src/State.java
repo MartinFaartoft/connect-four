@@ -4,10 +4,12 @@ public class State
 {
 	private FixedSizeStack[] _board;
 	private Stack<Move> _moves;
-	private int _boardSize;
+	private int _width;
+	private int _height;
 	public State(int width, int height) {
 		_board = new FixedSizeStack[width];
-		_boardSize = width * height;
+		_width = width;
+		_height = height;
 		for(int i = 0; i < width; i++) {
 			_board[i] = new FixedSizeStack(height);
 		}
@@ -34,6 +36,10 @@ public class State
 	}
 	
 	public int Peek(int col, int row) {
+		if(col < 0 || col >= _width || row < 0 || row >= _height) {
+			return -1;
+		}
+		
 		return _board[col].peek(row);
 	}
 
@@ -51,10 +57,15 @@ public class State
 	}
 
 	private void undo(Move m) {
+		
 		_board[m.column].pop();
 	}
 
 	public int columnHeight(int col) {
 		return _board[col].size();
+	}
+
+	public boolean isBoardFull() {
+		return _moves.size() >= _width * _height;
 	}
 }

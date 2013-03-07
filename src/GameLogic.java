@@ -5,7 +5,7 @@ public class GameLogic implements IGameLogic {
     private int playerID;
     private int opponentID;
     private State state;
-    
+    private TerminalStateChecker t = new TerminalStateChecker();
     
     int expandedNodes = 0;
     
@@ -22,8 +22,7 @@ public class GameLogic implements IGameLogic {
     }
 	
     public Winner gameFinished() {
-        //TODO Write your implementation for this method
-        return Winner.NOT_FINISHED;
+        return t.check(state);
     }
 
 
