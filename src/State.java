@@ -19,7 +19,7 @@ public class State
 	
 	public void insertCoins(int player, int... columns) {
 		for (int c : columns) {
-			_board[c].Push(player);
+			_board[c].push(player);
 			_moves.push(new Move(c, player));
 		}
 	}

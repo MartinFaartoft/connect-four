@@ -8,7 +8,7 @@ public class FixedSizeStack {
 		_values = new int[_capacity];
 	}
 	
-	public void Push(int n) {
+	public void push(int n) {
 		if(_size == _capacity) {
 			throw new IllegalStateException("cannot push to full stack");
 		}
@@ -20,9 +20,9 @@ public class FixedSizeStack {
 		if(_size == 0) {
 			throw new IllegalStateException("cannot pop from empty stack");
 		}
-		
-		int val = _values[_size];
-		_values[_size--] = 0;
+		int index = _size-- - 1;
+		int val = _values[index];
+		_values[index] = 0;
 		
 		return val;
 	}

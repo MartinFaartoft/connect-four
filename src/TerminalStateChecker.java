@@ -1,5 +1,10 @@
 public class TerminalStateChecker {
 	private static int[][] vectors = new int[][] {{1, 1}, {1, -1}, {1, 0}, {0, 1}};
+	private int _coinsInARowForWin;
+	
+	public TerminalStateChecker(int coinsInARowForWin) {
+		_coinsInARowForWin = coinsInARowForWin;
+	}
 	
 	public IGameLogic.Winner check(State s) {
 		//get index of last move
@@ -17,7 +22,7 @@ public class TerminalStateChecker {
 			int x = col + v[0];
 			int y = row + v[1];
 			
-			while(found < 4 && s.Peek(x, y) == p) { //look ahead 
+			while(found < _coinsInARowForWin && s.Peek(x, y) == p) { //look ahead 
 				found++;
 				x += v[0];
 				y += v[1];
@@ -26,13 +31,13 @@ public class TerminalStateChecker {
 			x = col - v[0];
 			y = row - v[1];
 			
-			while(found < 4 && s.Peek(x, y) == p) { //look behind
+			while(found < _coinsInARowForWin && s.Peek(x, y) == p) { //look behind
 				found++;
 				x -= v[0];
 				y -= v[1];
 			}
 			
-			if (found >= 4) {
+			if (found >= _coinsInARowForWin) {
 				return p == 1 ? IGameLogic.Winner.PLAYER1 : IGameLogic.Winner.PLAYER2;
 			}
 		}

@@ -11,7 +11,7 @@ public class TerminalStateCheckerTest {
 	
 	@Before
 	public void SetUp() {
-		c = new TerminalStateChecker();
+		c = new TerminalStateChecker(4);
 		s = new State(10, 10);
 	}
 	
