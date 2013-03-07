@@ -1,11 +1,11 @@
 
 public class GameLogic implements IGameLogic {
-    private int x = 0;
-    private int y = 0;
+    private int width = 0;
+    private int height = 0;
     private int playerID;
-    
-    private int[][] board;
     private int opponentID;
+    private State state;
+    
     
     int expandedNodes = 0;
     
@@ -14,13 +14,11 @@ public class GameLogic implements IGameLogic {
     }
 	
     public void initializeGame(int x, int y, int playerID) {
-        this.x = x;
-        this.y = y;
+        width = x;
+        height = y;
         this.playerID = playerID;
-        
-        board = new int[x][y];
-        if (playerID == 1) opponentID = 2;
-        if (playerID == 2) opponentID = 1;
+        opponentID = playerID == 1 ? 2 : 1;
+        state = new State(width, height);
     }
 	
     public Winner gameFinished() {
@@ -29,9 +27,8 @@ public class GameLogic implements IGameLogic {
     }
 
 
-    public void insertCoin(int column, int playerID) {
-        //TODO Write your implementation for this method	
-    	board = resultOfActionBoard(board, column, playerID);
+    public void insertCoin(int column, int player) {
+    	state.insertCoin(column, player);
     }
 
     public int decideNextMove() {    	
@@ -39,16 +36,13 @@ public class GameLogic implements IGameLogic {
     }
     
     public int minimaxDecision (){
-    	printBoard(board);
-    	
     	expandedNodes = 0;
-    	int resultAction = 0;
+    	int resultAction = -1;
     	double resultValue = Double.NEGATIVE_INFINITY;
     	
-    	for (int i = 0; i < x; i++) { //For each possible action
-    		int[][] boardAfterAction = new int[x][y];
-    		boardAfterAction = resultOfActionBoard(board, i, playerID);
-    		double value = minValue(boardAfterAction);
+    	for (int i = 0; i < width; i++) { //For each possible action
+    		state.insertCoin(i, playerID);
+    		double value = minValue();
     		
 			if (value > resultValue){
 				resultAction = i;
@@ -62,65 +56,73 @@ public class GameLogic implements IGameLogic {
     	return resultAction;
     }
     
-    public double maxValue (int[][] boardInspecting){
+    public double maxValue (){
     	System.out.println("PLAYER MAX - expandedNodes: " + expandedNodes);
-    	
     	
     	expandedNodes++;
     	//if (TERMINAL-TEST) return UTILITY(state);
-    	if (simpleCheckRowTest(boardInspecting)) return 5 * emptySlotsCount(boardInspecting);
+    	//if (simpleCheckRowTest(boardInspecting)) return 5 * emptySlotsCount(boardInspecting);
 
-    	if (simpleCheckColumnTest(boardInspecting)) return 10 * emptySlotsCount(boardInspecting);
-    	if (simpleTerminalTest(boardInspecting)) return 0;
+    	//if (simpleCheckColumnTest(boardInspecting)) return 10 * emptySlotsCount(boardInspecting);
+    	//if (simpleTerminalTest(boardInspecting)) return 0;
+    	
+    	boolean isTerminal = false;
+    	
+    	if(isTerminal) {
+    		return -1; //TODO some value
+    	}
+    	
     	
     	double value = Double.NEGATIVE_INFINITY;
 
-    	for (int i = 0; i < x; i++) { //For each possible action
+    	for (int i = 0; i < width; i++) { //For each possible action
     		
-    		if (boardInspecting[i][y - 1] > 0) continue; //Illegal move  
-    		int[][] boardAfterAction = new int[x][y];
-    		printBoard(boardInspecting);
-    		boardAfterAction = resultOfActionBoard(boardInspecting, i, playerID);
-    		printBoard(boardAfterAction);
-    		value = Math.max(value, minValue(boardAfterAction));
+    		if (state.isColumnFull(i)) continue; //Illegal move  
+    		
+    		state.insertCoin(i, playerID);
+    		value = Math.max(value, minValue());
+    		state.undoLastMove();
     	}
     	
     	System.out.println("Value of node: " + value);
 
-    	
     	return value;
 	}
     
-    public double minValue (int[][] boardInspecting){
+    public double minValue (){
     	System.out.println("PLAYER MIN - expandedNodes: " + expandedNodes);
     	
     	expandedNodes++;
     	//if (TERMINAL-TEST) return UTILITY(state);
-    	if (simpleCheckRowTest(boardInspecting)) return 5 * emptySlotsCount(boardInspecting);
+    	//if (simpleCheckRowTest(state)) return 5 * emptySlotsCount(state);
 
-    	if (simpleCheckColumnTest(boardInspecting)) return 10 * emptySlotsCount(boardInspecting);
-    	if (simpleTerminalTest(boardInspecting)) return 0;
+    	//if (simpleCheckColumnTest(state)) return 10 * emptySlotsCount(state);
+    	//if (simpleTerminalTest(state)) return 0;
+    	
+    	boolean isTerminal = false;
+    	
+    	if(isTerminal) {
+    		return -1; //TODO some value
+    	}
     	
     	double value = Double.POSITIVE_INFINITY;
     	    	
-    	for (int i = 0; i < x; i++) { //For each possible action
-    		if (boardInspecting[i][y - 1] > 0) continue; //Illegal move  
-    		int[][] boardAfterAction = new int[x][y];
-    		printBoard(boardInspecting);
-    		boardAfterAction = resultOfActionBoard(boardInspecting, i, opponentID);
-    		printBoard(boardAfterAction);
-    		value = Math.min(value, maxValue(boardAfterAction));
+    	for (int i = 0; i < width; i++) { //For each possible action
+    		if (state.isColumnFull(i)) continue; //Illegal move  
+    		
+    		state.insertCoin(i, opponentID);
+    		value = Math.min(value, maxValue());
+    		state.undoLastMove();
     	}
     	
     	System.out.println("Value of node: " + value);
 
-    	
     	return value;
 	}
     
     public boolean simpleTerminalTest(int[][] boardToCheck){
-    	for (int i = 0; i < x; i++) {
-    		if (boardToCheck[i][y - 1] == 0) return false;
+    	for (int i = 0; i < width; i++) {
+    		if (boardToCheck[i][height - 1] == 0) return false;
         }
     	return true;
     
@@ -128,7 +130,7 @@ public class GameLogic implements IGameLogic {
     
     public boolean simpleCheckColumnTest(int[][] boardToCheck){
     	
-    	for (int i = 0; i < x; i++) {
+    	for (int i = 0; i < width; i++) {
     		if (boardToCheck[i][0] == playerID){
     			if (boardToCheck[i][1] == playerID){
     				return true;
@@ -139,24 +141,24 @@ public class GameLogic implements IGameLogic {
     	return false;
     }
     
-    public boolean simpleCheckRowTest(int[][] boardToCheck){
-    	
-    	for (int j = 0; j < y; j++) {
-    		if (boardToCheck[0][j] == playerID){
-    			if (boardToCheck[1][j] == playerID){
-    				return true;
-    				
-    			}
-    		}
-        }
+    public boolean simpleCheckRowTest(State boardToCheck){
     	return false;
+//    	for (int j = 0; j < y; j++) {
+//    		if (boardToCheck[0][j] == playerID){
+//    			if (boardToCheck[1][j] == playerID){
+//    				return true;
+//    				
+//    			}
+//    		}
+//        }
+//    	return false;
     }
     
     public void printBoard(int[][] boardInspecting){
     	System.out.println("BOARD: ");
-    	for (int j = y - 1; j > -1; j--) {
+    	for (int j = height - 1; j > -1; j--) {
 				
-			for (int i = 0; i < x; i++) {
+			for (int i = 0; i < width; i++) {
 				System.out.print(boardInspecting[i][j] + " ");
 			}
 			System.out.println(" ");
@@ -165,33 +167,11 @@ public class GameLogic implements IGameLogic {
     
     public int emptySlotsCount(int[][] boardInspecting){
     	int count = 0;
-    	for (int i = 0; i < x; i++) {
-        	for (int j = 0; j < y; j++) {
+    	for (int i = 0; i < width; i++) {
+        	for (int j = 0; j < height; j++) {
         		if (boardInspecting[i][j] == 0) count++;
         	}
     	}
     	return count;
     }
-    
-    public int[][] resultOfActionBoard(int[][] beforeBoard, int action, int player){
-    	int[][] newboard = new int[x][y];
-
-    	for (int i = 0; i < x; i++) {
-    		for (int j = 0; j < y; j++) {
-    			newboard[i][j] = beforeBoard[i][j];
-    		}
-    	}
-    
-    	//printBoard(newboard);
-    	
-    	for (int j = 0; j < y; j++){
-    		if (beforeBoard[action][j] == 0){
-    			newboard[action][j] = player;
-    			break;
-    		}
-    	}
-    	
-    	return newboard;
-    }
-
 }

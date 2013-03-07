@@ -16,7 +16,7 @@ public class FixedSizeStack {
 		_values[_size++] = n;
 	}
 	
-	public int Pop() {
+	public int pop() {
 		if(_size == 0) {
 			throw new IllegalStateException("cannot pop from empty stack");
 		}
@@ -27,15 +27,19 @@ public class FixedSizeStack {
 		return val;
 	}
 	
-	public int Peek(int index) {
+	public int peek(int index) {
 		return _values[index];
 	}
 	
-	public int Peek() {
+	public int peek() {
 		return _values[_size-1];
 	}
 
 	public int size() {
 		return _size;
+	}
+
+	public boolean isFull() {
+		return _size == _capacity;
 	}
 }

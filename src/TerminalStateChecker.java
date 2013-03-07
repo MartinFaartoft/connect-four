@@ -13,7 +13,7 @@ public class TerminalStateChecker {
 		
 		int p = lastMove.player;
 		int col = lastMove.column;
-		int row = lastMove.row;
+		int row = _currentState.columnHeight(col) - 1;
 		
 		for (int[] d : Directions) {
 			if(foundConnected(4, col, row, p, d)) {
