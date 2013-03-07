@@ -6,12 +6,6 @@ public class GameLogic implements IGameLogic {
     private State state;
     private TerminalStateChecker t = new TerminalStateChecker(3);
     
-    int expandedNodes;
-    
-    public GameLogic() {
-
-    }
-	
     public void initializeGame(int x, int y, int playerID) {
         width = x;
         this.playerID = playerID;
@@ -33,7 +27,6 @@ public class GameLogic implements IGameLogic {
     }
     
     public int minimaxDecision (){
-    	expandedNodes = 0;
     	int resultAction = -1;
     	int resultValue = Integer.MIN_VALUE;
     	
@@ -47,8 +40,7 @@ public class GameLogic implements IGameLogic {
 				resultValue = value;
 			}    		
     	}
-    	    	    	    	
-    	System.out.println("Ended calculation, expandedNodes: " + expandedNodes);
+
     	System.out.println("resultAction: " + resultAction + ", resultValue: " + resultValue);
     	
     	return resultAction;
@@ -68,12 +60,10 @@ public class GameLogic implements IGameLogic {
     	
     }
     
-    public int maxValue (int depth){
-    	System.out.println("MIN( " + depth + " ) - " + expandedNodes++);
-    	
-    	IGameLogic.Winner gameState = t.check(state);
-    	if(gameState != IGameLogic.Winner.NOT_FINISHED) {
-    		return utility(gameState);
+    public int maxValue (int depth) {
+    	IGameLogic.Winner res = t.check(state);
+    	if(res != IGameLogic.Winner.NOT_FINISHED) {
+    		return utility(res);
     	}
     	
     	int value = Integer.MIN_VALUE;
@@ -87,17 +77,14 @@ public class GameLogic implements IGameLogic {
     		state.undoLastMove();
     	}
     	
-    	//System.out.println("Value of node: " + value);
-
     	return value;
 	}
     
-    public int minValue (int depth){
-    	System.out.println("MIN( " + depth + " ) - " + expandedNodes++);
+    public int minValue (int depth) {
     	
-    	IGameLogic.Winner gameState = t.check(state);
-    	if(gameState != IGameLogic.Winner.NOT_FINISHED) {
-    		return utility(gameState);
+    	IGameLogic.Winner res = t.check(state);
+    	if(res != IGameLogic.Winner.NOT_FINISHED) {
+    		return utility(res);
     	}
     	
     	int value = Integer.MAX_VALUE;
@@ -109,8 +96,6 @@ public class GameLogic implements IGameLogic {
     		value = Math.min(value, maxValue(depth+1));
     		state.undoLastMove();
     	}
-    	
-    	//System.out.println("Value of node: " + value);
 
     	return value;
 	}
