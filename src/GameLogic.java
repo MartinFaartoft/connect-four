@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 public class GameLogic implements IGameLogic {
     private int width;
     private int playerID;
@@ -6,6 +8,10 @@ public class GameLogic implements IGameLogic {
     private TerminalStateChecker t = new TerminalStateChecker(4);
 	private int height;
     
+	private int cacheHits = 0;
+	
+	private HashMap<State, CacheEntry> cache = new HashMap<State, CacheEntry>();
+	
     public void initializeGame(int x, int y, int playerID) {
         width = x;
         height = y;
@@ -25,34 +31,17 @@ public class GameLogic implements IGameLogic {
     public int decideNextMove() {    	
     	int d = 1;
     	int move = -1;
+    	int value;
     	while(d <= 10) {
-    		move = maxValue(0, Integer.MIN_VALUE, Integer.MAX_VALUE, d);
-    		System.out.println(d + " ply, best move: " + move);
+    		value = maxValue(0, Integer.MIN_VALUE, Integer.MAX_VALUE, d);
+    		move = cache.get(state).bestAction;
+    		System.out.println(d + " ply, best move: " + move + ", value: " + value + ", cache hits: " + cacheHits);
     		d++;
+    		cacheHits = 0;
     	}
     	//return maxValue(0, Integer.MIN_VALUE, Integer.MAX_VALUE);
     	
     	return move;
-    }
-    
-    public int minimaxDecision (){
-    	int resultAction = -1;
-    	int resultValue = Integer.MIN_VALUE;
-    	
-    	for (int i = 0; i < width; i++) { //For each possible action
-    		if (state.isColumnFull(i)) continue; //Illegal move 
-    		state.insertCoin(i, playerID);
-    		int value = 1;//minValue(1);
-    		state.undoLastMove();
-			if (value > resultValue){
-				resultAction = i;
-				resultValue = value;
-			}
-    	}
-
-    	System.out.println("resultAction: " + resultAction + ", resultValue: " + resultValue);
-    	
-    	return resultAction;
     }
     
     private int utility(IGameLogic.Winner w) {
@@ -90,10 +79,19 @@ public class GameLogic implements IGameLogic {
     }
     
     public int maxValue (int depth, int a, int b, int maxDepth) {
+    	
+    	CacheEntry entry = cache.get(state);
+    	if (entry != null && entry.subTreeDepth >= maxDepth - depth){
+    		cacheHits++;
+    		return entry.minimax;	
+    	}
+    	
+    	
     	IGameLogic.Winner res = t.check(state);
     	if(res != IGameLogic.Winner.NOT_FINISHED) {
     		return utility(res);
     	}
+
     	
     	if(depth == maxDepth) {
     		return heuristic();
@@ -120,15 +118,24 @@ public class GameLogic implements IGameLogic {
     		a = Math.max(a, value);
     	}
     	
-    	if(depth == 0) {
-    		return bestMove;
-    	}
+    	updateCache(value, maxDepth - depth, bestMove);
     	
     	return value;
 	}
     
-    public int minValue (int depth, int a, int b, int maxDepth) {
+    private void updateCache(int value, int i, int bestMove) {
+    	cache.put(state, new CacheEntry(value, i, bestMove));
+	}
+
+	public int minValue (int depth, int a, int b, int maxDepth) {
     	
+    	CacheEntry entry = cache.get(state);
+    	if (entry != null && entry.subTreeDepth >= maxDepth - depth){
+    		cacheHits++;
+    		return entry.minimax;	
+    	}
+		
+		
     	IGameLogic.Winner res = t.check(state);
     	if(res != IGameLogic.Winner.NOT_FINISHED) {
     		return utility(res);
@@ -153,6 +160,8 @@ public class GameLogic implements IGameLogic {
     		b = Math.min(value, b);
     	}
 
+    	updateCache(value, maxDepth - depth, -1); //todo
+    	
     	return value;
 	}
 }
