@@ -10,7 +10,7 @@ public class GameLogicTM implements IGameLogic {
     
 	private int cacheHits = 0;
 	
-	private HashMap<State, CacheEntry> cache = new HashMap<State, CacheEntry>();
+	private HashMap<Integer, CacheEntry> cache = new HashMap<Integer, CacheEntry>();
 	
     public void initializeGame(int x, int y, int playerID) {
         width = x;
@@ -36,7 +36,7 @@ public class GameLogicTM implements IGameLogic {
     	long limit = now + 10 * 1000;
     	while(System.currentTimeMillis() < limit) {
     		value = maxValue(0, Integer.MIN_VALUE, Integer.MAX_VALUE, d);
-    		move = cache.get(state).bestAction;
+    		move = cache.get(state.hashCode()).bestAction;
     		System.out.println(d + " ply, best move: " + move + ", value: " + value + ", cache hits: " + cacheHits);
     		d++;
     		cacheHits = 0;
@@ -80,7 +80,7 @@ public class GameLogicTM implements IGameLogic {
     }
     
     public int maxValue (int depth, int a, int b, int maxDepth) {
-    	CacheEntry entry = cache.get(state);
+    	CacheEntry entry = cache.get(state.hashCode());
     	if (entry != null && entry.subTreeDepth >= maxDepth - depth){
     		cacheHits++;
     		return entry.minimax;	
@@ -121,7 +121,7 @@ public class GameLogicTM implements IGameLogic {
 	}
     
 	public int minValue (int depth, int a, int b, int maxDepth) {
-    	CacheEntry entry = cache.get(state);
+    	CacheEntry entry = cache.get(state.hashCode());
     	if (entry != null && entry.subTreeDepth >= maxDepth - depth){
     		cacheHits++;
     		return entry.minimax;	
@@ -159,7 +159,8 @@ public class GameLogicTM implements IGameLogic {
     	return value;
 	}
 	
-	private void updateCache(int value, int i, int bestMove) {
-    	cache.put(state, new CacheEntry(value, i, bestMove));
+	private void updateCache(int value, int subTreeSize, int bestMove) {
+		cache.put(state.hashCode(), new CacheEntry(value, subTreeSize, bestMove));
+		cache.put(state.reverseHashCode(), new CacheEntry(value, subTreeSize, width - bestMove - 1));
 	}
 }
