@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.Stack;
 
 public class State
@@ -6,6 +7,8 @@ public class State
 	private Stack<Move> _moves;
 	private int _width;
 	private int _height;
+	private int[][][] _zobrist;
+	private int _hash = 0;
 	public State(int width, int height) {
 		_board = new FixedSizeStack[width];
 		_width = width;
@@ -15,15 +18,33 @@ public class State
 		}
 		
 		_moves = new Stack<Move>();
+		initZobrist(width, height);
 	}
 	
+	private void initZobrist(int width, int height) {
+		Random r = new Random();
+		_zobrist = new int[width][height][2];
+		
+		for(int i = 0; i < width; i++) {
+			for(int j = 0; j < height; j++) {
+				_zobrist[i][j][0] = r.nextInt(Integer.MAX_VALUE);
+				_zobrist[i][j][1] = r.nextInt(Integer.MAX_VALUE);
+			}
+		}
+	}
+
 	public void insertCoins(int player, int... columns) {
 		for (int c : columns) {
 			_board[c].push(player);
 			_moves.push(new Move(c, player));
+			updateHash(player, c, _board[c].size() - 1);
 		}
 	}
 	
+	private void updateHash(int p, int x, int y) {
+		_hash = _hash ^ _zobrist[x][y][p-1];
+	}
+
 	public void insertCoin(int column, int player) {
 		insertCoins(player, column);
 	}
@@ -54,6 +75,7 @@ public class State
 		
 		Move m = _moves.pop();
 		undo(m);
+		updateHash(m.player, m.column, _board[m.column].size());
 	}
 
 	private void undo(Move m) {
@@ -67,5 +89,9 @@ public class State
 
 	public boolean isBoardFull() {
 		return _moves.size() >= _width * _height;
+	}
+	
+	public int hashCode() {
+		return _hash;
 	}
 }
