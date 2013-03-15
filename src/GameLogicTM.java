@@ -48,14 +48,11 @@ public class GameLogicTM implements IGameLogic {
     	long searchStartTime = System.currentTimeMillis();
     	long searchFinishTime = searchStartTime + timeLimit;
     	int remainingMoves = state.getRemainingMoves();
+    	
     	while(System.currentTimeMillis() < searchFinishTime && d <= remainingMoves) {
     		searchStartedForCurrentDepth = System.currentTimeMillis();
     		value = maxValue(0, Integer.MIN_VALUE, Integer.MAX_VALUE, d); //recurse
     		move = cache.get(state.hashCode()).bestAction; //look up chosen move in cache
-    		
-    		if(value == WIN_VALUE) {
-    			break;
-    		}
     		
     		now = System.currentTimeMillis();
     		timeTakenForCurrentDepth = now - searchStartedForCurrentDepth;
@@ -64,6 +61,11 @@ public class GameLogicTM implements IGameLogic {
     		if(timeTakenForCurrentDepth > timeLeft) {
     			break; //no time for next search;
     		}
+    		
+    		if(value == WIN_VALUE) {
+    			break; //found a win, chase it!
+    		}
+    		
     		d++;
     		cacheHits = 0;
     	}
