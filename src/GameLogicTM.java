@@ -43,20 +43,32 @@ public class GameLogicTM implements IGameLogic {
     	int d = 1;
     	int move = -1;
     	int value;
-    	long now = System.currentTimeMillis();
-    	long limit = now + 10 * 1000;
+    	long timeLimit = 8 * 1000;
+    	long timeTakenForCurrentDepth, searchStartedForCurrentDepth, timeLeft, now;
+    	cache.clear();
+    	long searchStartTime = System.currentTimeMillis();
+    	long searchFinishTime = searchStartTime + timeLimit;
     	int remainingMoves = state.getRemainingMoves();
-    	while(System.currentTimeMillis() < limit && d <= remainingMoves) {
-    		value = maxValue(0, Integer.MIN_VALUE, Integer.MAX_VALUE, d);
-    		move = cache.get(state.hashCode()).bestAction;
-    		if(value == WIN_VALUE || value == LOSE_VALUE) {
+    	while(System.currentTimeMillis() < searchFinishTime && d <= remainingMoves) {
+    		searchStartedForCurrentDepth = System.currentTimeMillis();
+    		value = maxValue(0, Integer.MIN_VALUE, Integer.MAX_VALUE, d); //recurse
+    		move = cache.get(state.hashCode()).bestAction; //look up chosen move in cache
+    		
+    		if(value == WIN_VALUE) {
     			break;
     		}
-    		System.out.println(d + " ply, best move: " + move + ", value: " + value + ", cache hits: " + cacheHits);
+    		
+    		now = System.currentTimeMillis();
+    		timeTakenForCurrentDepth = now - searchStartedForCurrentDepth;
+    		timeLeft = searchFinishTime - now;
+    		System.out.println(d + " ply, best move: " + move + ", value: " + value + ", cache hits: " + cacheHits + ", time taken: " + timeTakenForCurrentDepth); 
+    		if(timeTakenForCurrentDepth > timeLeft) {
+    			break; //no time for next search;
+    		}
     		d++;
     		cacheHits = 0;
     	}
-    	System.out.println("Decided on: " + move + " with value: " + cache.get(state.hashCode()).minimax + ". Search took: " + (System.currentTimeMillis() - now) + "ms");
+    	System.out.println("Decided on: " + move + " with value: " + cache.get(state.hashCode()).minimax + ". Search took: " + (System.currentTimeMillis() - searchStartTime) + "ms");
     	
     	return move;
     }
