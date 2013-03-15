@@ -47,4 +47,11 @@ public class StateTest {
 		assertEquals(0, s.hashCode());
 	}
 	
+	@Test
+	public void moveRowShouldBeCorrect() {
+		State s = new State(1,1);
+		s.insertCoin(0, 1);
+		
+		assertEquals(0, s.PeekLatestMove().row);
+	}
 }

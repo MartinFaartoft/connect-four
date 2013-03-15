@@ -36,7 +36,7 @@ public class State
 	public void insertCoins(int player, int... columns) {
 		for (int c : columns) {
 			_board[c].push(player);
-			_moves.push(new Move(c, player));
+			_moves.push(new Move(c, player, _board[c].size() - 1));
 			updateHash(player, c, _board[c].size() - 1);
 		}
 	}
@@ -93,6 +93,10 @@ public class State
 	
 	public int hashCode() {
 		return _hash;
+	}
+
+	public Stack<Move> getMoves() {
+		return _moves;
 	}
 	
 }
