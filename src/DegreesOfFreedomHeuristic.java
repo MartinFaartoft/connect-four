@@ -1,7 +1,7 @@
 
 public class DegreesOfFreedomHeuristic implements IHeuristic {
-	private static int[][] vectors = new int[][] {{1, 1}, {1, -1}, {1, 0}, {0, 1}};
-	int maxDistance = 4;
+	private static final int[][] vectors = new int[][] {{1, 1}, {1, -1}, {1, 0}, {0, 1}};
+	final int maxDistance = 4;
 	@Override
 	public int Evaluate(State s, int playerID) {
 		int v = 0;

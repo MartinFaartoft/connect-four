@@ -93,6 +93,10 @@ public class State
 		return _moves.size() >= _width * _height;
 	}
 	
+	public int getRemainingMoves() {
+		return _width * _height - _moves.size();
+	}
+	
 	public int hashCode() {
 		return _hash;
 	}
