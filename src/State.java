@@ -9,6 +9,7 @@ public class State
 	private int _height;
 	private int[][][] _zobrist;
 	private int _hash = 0;
+	private int _mirroredHash = 0;
 	public State(int width, int height) {
 		_board = new FixedSizeStack[width];
 		_width = width;
@@ -43,6 +44,7 @@ public class State
 	
 	private void updateHash(int p, int x, int y) {
 		_hash = _hash ^ _zobrist[x][y][p-1];
+		_mirroredHash = _mirroredHash ^ _zobrist[_width - x -1][y][p-1];
 	}
 
 	public void insertCoin(int column, int player) {
@@ -99,4 +101,7 @@ public class State
 		return _moves;
 	}
 	
+	public Integer reverseHashCode() {
+		return _mirroredHash;
+	}	
 }
