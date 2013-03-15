@@ -1,7 +1,8 @@
 
 public class DegreesOfFreedomHeuristic implements IHeuristic {
 	private static final int[][] vectors = new int[][] {{1, 1}, {1, -1}, {1, 0}, {0, 1}};
-	final int maxDistance = 4;
+	private final int maxDistance = 4;
+	private final int ownPieceMultiplier = 1;
 	@Override
 	public int Evaluate(State s, int playerID) {
 		int v = 0;
@@ -17,11 +18,19 @@ public class DegreesOfFreedomHeuristic implements IHeuristic {
 		int row = move.row;
 		int p = move.player;
 		int freedoms = 0;
+		int piece;
 		for(int[] v : vectors) {
+			int ownPieces = 0;
 			int x = col;
 			int y = row;
 			int leftdistance = 0;
-			while(leftdistance <= maxDistance && s.Peek(x, y) == p || s.Peek(x, y) == 0) { //look ahead 
+			while(leftdistance <= maxDistance) { //look ahead 
+				piece = s.Peek(x, y);
+				if(piece != 0 && piece != p) break;
+				
+				if(piece == p) {
+					ownPieces++;
+				}
 				leftdistance++;
 				x += v[0];
 				y += v[1];
@@ -29,12 +38,20 @@ public class DegreesOfFreedomHeuristic implements IHeuristic {
 			x = col;
 			y = row;
 			int rightdistance = 0;
-			while(rightdistance <= maxDistance && s.Peek(x, y) == p || s.Peek(x, y) == 0) { //look behind
+			while(rightdistance <= maxDistance) { //look behind
+				piece = s.Peek(x, y);
+				if(piece != 0 && piece != p) break;
+				
+				if(piece == p) {
+					ownPieces++;
+				}
 				rightdistance++;
 				x -= v[0];
 				y -= v[1];
 			}
-			freedoms += Math.max(0, rightdistance + leftdistance - 4); 			
+			
+			int freedomsForThisPiece = Math.max(0, rightdistance + leftdistance - 4); 
+			freedoms += freedomsForThisPiece == 0 ? 0 : freedomsForThisPiece + ownPieces * ownPieceMultiplier; 			
 		}
 		
 		return freedoms * (p == playerID ? 1 : -1);
