@@ -45,7 +45,6 @@ public class GameLogicTM implements IGameLogic {
     	int value;
     	long timeLimit = 8 * 1000;
     	long timeTakenForCurrentDepth, searchStartedForCurrentDepth, timeLeft, now;
-    	cache.clear();
     	long searchStartTime = System.currentTimeMillis();
     	long searchFinishTime = searchStartTime + timeLimit;
     	int remainingMoves = state.getRemainingMoves();
@@ -69,7 +68,7 @@ public class GameLogicTM implements IGameLogic {
     		cacheHits = 0;
     	}
     	System.out.println("Decided on: " + move + " with value: " + cache.get(state.hashCode()).minimax + ". Search took: " + (System.currentTimeMillis() - searchStartTime) + "ms");
-    	
+    	cache.clear();
     	return move;
     }
     
@@ -204,6 +203,6 @@ public class GameLogicTM implements IGameLogic {
 	
 	private void updateCache(int value, int subTreeSize, int bestMove) {
 		cache.put(state.hashCode(), new CacheEntry(value, subTreeSize, bestMove));
-		cache.put(state.reverseHashCode(), new CacheEntry(value, subTreeSize, width - bestMove - 1));
+		//cache.put(state.reverseHashCode(), new CacheEntry(value, subTreeSize, width - bestMove - 1));
 	}
 }
